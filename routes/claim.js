@@ -2,6 +2,8 @@ var express = require('express');
 var router = express.Router();
 var bodyParser = require('body-parser')
 let tokenSDKServer = require('token-sdk-server')
+let cors = require('./cors')
+var fs = require('fs')
 
 router.use(bodyParser.json())
 
@@ -24,33 +26,51 @@ router.route('/')
   })
 
 router.route('/checkValidity')
-  .options((req, res) => {
+  .options(cors.corsWithOptions, (req, res) => {
     res.sendStatus(200)
   })
-  .get((req, res, next) => {
+  .get(cors.corsWithOptions, (req, res, next) => {
     res.send('get')
   })
-  .post((req, res, next) => {
+  .post(cors.corsWithOptions, (req, res, next) => {
     let { temporaryId } = req.body
+    console.log('temporaryId', temporaryId)
     // 检查时间有效性
-    tokenSDKServer.getTemplate(temporaryId).then(response => {
-      // console.log(response)
-      let certifyData = response.result.certify_data
+    tokenSDKServer.getTemporaryCertifyData(temporaryId).then(response => {
+      let certifyData = response.data.result.certify_data
+      // 判断数据有效性
       if (certifyData) {
-        // 检查次数有效性
         certifyData = JSON.parse(certifyData)
-        if (certifyData.times) {
-          res.status(200).json({
-            result: true,
-            message: '',
-            data: response.result
-          })
+        let now = new Date().getTime()
+        // 判断时间有效性
+        if (Number(certifyData.expirationDate) > now) {
+          // 检查次数有效性
+          let checkValidity = fs.readFileSync('data/checkValidity.json')
+          checkValidity = JSON.parse(checkValidity.toString())
+          if (checkValidity[temporaryId] === undefined) {
+            checkValidity[temporaryId] = Number(certifyData.availableTimes)
+            fs.writeFileSync('data/checkValidity.json', JSON.stringify(certifyData))
+            return response.data.result
+          } else {
+            if (checkValidity[temporaryId] > 1) {
+              checkValidity[temporaryId]--
+              return response.data.result
+            } else {
+              return Promise.reject(new Error('不在有效次数内'))
+            }
+          }
         } else {
-          return Promise.reject(new Error('不在有效次数内'))
+          return Promise.reject(new Error('不在有效时间内'))
         }
       } else {
-        return Promise.reject(new Error('不在有效时间内'))
+        return Promise.reject(new Error('没有相应证书副本数据'))
       }
+    }).then(response => {
+      res.status(200).json({
+        result: true,
+        message: '',
+        data: response
+      })
     }).catch(error => {
       res.status(500).json({
         result: false,
@@ -59,10 +79,10 @@ router.route('/checkValidity')
       })
     })
   })
-  .put((req, res, next) => {
+  .put(cors.corsWithOptions, (req, res, next) => {
     res.send('put')
   })
-  .delete((req, res, next) => {
+  .delete(cors.corsWithOptions, (req, res, next) => {
     res.send('delete')
   })
 

@@ -3,9 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/confusechainserver",
-    "dev": "nodemon ./bin/confusechainserver",
-    "inspect": "node --inspect ./bin/confusechainserver"
+    "start": "node ./bin/confuseChainServer",
+    "dev": "nodemon ./bin/confuseChainServer",
+    "inspect": "node --inspect ./bin/confuseChainServer"
   },
   "dependencies": {
     "body-parser": "^1.19.0",

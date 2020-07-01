@@ -34,7 +34,7 @@ router.route('/checkValidity')
   })
   .post(cors.corsWithOptions, (req, res, next) => {
     let { temporaryId } = req.body
-    console.log('temporaryId', temporaryId)
+    // console.log('temporaryId', temporaryId)
     // 检查时间有效性
     tokenSDKServer.getTemporaryCertifyData(temporaryId).then(response => {
       let certifyData = response.data.result.certify_data

@@ -16,6 +16,6 @@
     "http-errors": "~1.6.3",
     "jade": "~1.11.0",
     "morgan": "~1.9.1",
-    "token-sdk-server": "0.0.5"
+    "token-sdk-server": "0.0.24"
   }
 }

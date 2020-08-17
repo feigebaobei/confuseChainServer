@@ -93,6 +93,38 @@ router.route('/getClaim')
     res.send('delete')
   })
 
+router.route('/getBackupData')
+  .options(cors.corsWithOptions, (req, res) => {
+    // console.log('options', )
+    res.sendStatus(200)
+  })
+  .get(cors.corsWithOptions, (req, res, next) => {
+    // res.send('get')
+    let {key} = req.query
+    tokenSDKServer.pullBackupData(key, false).then(response => {
+      res.status(200).json({
+        result: true,
+        message: '',
+        data: response.data
+      })
+    }).catch(error => {
+      res.status(500).json({
+        result: false,
+        message: '',
+        data: error
+      })
+    })
+  })
+  .post(cors.corsWithOptions, (req, res, next) => {
+    res.send('post')
+  })
+  .put(cors.corsWithOptions, (req, res, next) => {
+    res.send('put')
+  })
+  .delete(cors.corsWithOptions, (req, res, next) => {
+    res.send('delete')
+  })
+
 
 module.exports = router;
 
